@@ -45,7 +45,7 @@ class Blockchain{
         return 'Subsequent hash difference';
       }
     }
-    return true
+    return true;
   }
 }
 
