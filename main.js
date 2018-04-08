@@ -1,3 +1,4 @@
+
 const SHA256 = require('crypto-js/sha256');
 
 class Block{
@@ -7,15 +8,24 @@ class Block{
     this.data = data;
     this.previousHash = previousHash;
     this.hash = this.calculateHash();
+    this.nonce = 0;
   }
   calculateHash(){
-    return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString();
+    return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data) + this.nonce).toString();
+  }
+  mineBlock(difficulty){
+    while(this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
+      this.nonce++;
+      this.hash = this.calculateHash();
+    }
+    console.log("Block mined: " + this.hash);
   }
 }
 
 class Blockchain{
   constructor(){
     this.chain = [this.createGenesisBlock()];
+    this.difficulty = 4;
   }
 
   createGenesisBlock(){
@@ -28,7 +38,7 @@ class Blockchain{
 
   addBlock(newBlock){
     newBlock.previousHash = this.getLatestBlock().hash;
-    newBlock.hash = newBlock.calculateHash();
+    newBlock.mineBlock(this.difficulty);
     this.chain.push(newBlock);
   }
 
@@ -45,18 +55,26 @@ class Blockchain{
         return 'Subsequent hash difference';
       }
     }
-    return true;
+    return 'Blockchain is valid';
   }
 }
 
-let witCoin = new Blockchain();
-witCoin.addBlock(new Block(1, "10/07/2017", {amount: 4}));
-witCoin.addBlock(new Block(2, "11/07/2017", {amount: 6}));
+exports.Blockchain = Blockchain;
+exports.Block = Block;
 
-console.log(JSON.stringify(witCoin, null, 4));
-console.log('is blockchain valid? ' + witCoin.isChainValid());
-
-witCoin.chain[1].data = {amount: 8};
+// let witCoin = new Blockchain();
+// witCoin.addBlock(new Block(1, "10/07/2017", {amount: 4}));
+// witCoin.addBlock(new Block(2, "11/07/2017", {amount: 6}));
+//
+// console.log(JSON.stringify(witCoin, null, 4));
+// console.log('is blockchain valid? ' + witCoin.isChainValid());
+//
+// witCoin.chain[1].data = {amount: 8};
+//
+// console.log(JSON.stringify(witCoin, null, 4));
+// console.log('is blockchain valid? ' + witCoin.isChainValid());
+//
 // witCoin.chain[1].hash = witCoin.chain[1].calculateHash();
-console.log(JSON.stringify(witCoin, null, 4));
-console.log('is blockchain valid? ' + witCoin.isChainValid());
+//
+// console.log(JSON.stringify(witCoin, null, 4));
+// console.log('is blockchain valid? ' + witCoin.isChainValid());
